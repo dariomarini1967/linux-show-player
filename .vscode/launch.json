@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Linux Show Player ENHANCEMENTS",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/lisp/main.py",
+            "console": "integratedTerminal"
+        }
+    ]
+}
