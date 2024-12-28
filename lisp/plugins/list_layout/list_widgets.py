@@ -33,6 +33,20 @@ from lisp.cues.cue_time import CueTime, CueWaitTime
 from lisp.ui.icons import IconTheme
 from lisp.ui.widgets.cue_next_actions import tr_next_action
 
+class HotKeyWidget(QLabel):
+    def __init__(self, item, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAlignment(Qt.AlignCenter)
+        item.cue.changed("controller").connect(self.__update, Connection.QtQueued)
+        # if hasattr(item.cue,'controller'):
+        self.__update(item.cue.controller)
+        
+    def __update(self, oneController):
+        if 'keyboard' in oneController:
+            super().setText(oneController['keyboard'][0][0])
+        else:
+            super().setText('')
 
 class IndexWidget(QLabel):
     def __init__(self, item, *args, **kwargs):
@@ -46,7 +60,9 @@ class IndexWidget(QLabel):
             self.fontMetrics().size(Qt.TextSingleLine, "00").width(), 0
         )
 
+        # Connect a signal to update the index displayed when the cue index changes
         item.cue.changed("index").connect(self.__update, Connection.QtQueued)
+        # Update the displayed index at initialization
         self.__update(item.cue.index)
 
     def sizeHint(self):

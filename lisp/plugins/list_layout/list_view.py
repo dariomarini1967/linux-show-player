@@ -38,6 +38,7 @@ from lisp.plugins.list_layout.list_widgets import (
     NextActionIcon,
     PostWaitWidget,
     IndexWidget,
+    HotKeyWidget,
 )
 from lisp.ui.ui_utils import translate, css_to_dict, dict_to_css
 
@@ -71,6 +72,7 @@ class CueListView(QTreeWidget):
     # TODO: add ability to show/hide
     # TODO: implement columns (cue-type / target / etc..)
     COLUMNS = [
+        ListColumn("Hotkey", HotKeyWidget, QHeaderView.ResizeToContents),
         ListColumn("", CueStatusIcons, QHeaderView.Fixed, width=45),
         ListColumn("#", IndexWidget, QHeaderView.ResizeToContents),
         ListColumn(
