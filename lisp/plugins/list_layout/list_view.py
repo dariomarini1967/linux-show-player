@@ -39,6 +39,7 @@ from lisp.plugins.list_layout.list_widgets import (
     PostWaitWidget,
     IndexWidget,
     HotKeyWidget,
+    RepeatWidget
 )
 from lisp.ui.ui_utils import translate, css_to_dict, dict_to_css
 
@@ -90,6 +91,7 @@ class CueListView(QTreeWidget):
             QT_TRANSLATE_NOOP("ListLayoutHeader", "Post wait"), PostWaitWidget
         ),
         ListColumn("", NextActionIcon, QHeaderView.Fixed, width=18),
+        ListColumn("Repeat", RepeatWidget, QHeaderView.ResizeToContents),
     ]
 
     ITEM_DEFAULT_BG = QBrush(Qt.transparent)

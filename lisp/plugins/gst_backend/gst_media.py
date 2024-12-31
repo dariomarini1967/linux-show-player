@@ -64,6 +64,7 @@ class GstMedia(Media):
         self.__pipeline = None
         self.__finalizer = None
         self.__loop = 0  # current number of loops left to do
+        self.__dario='d'
         self.__current_pipe = None  # A copy of the pipe property
 
         self.changed("loop").connect(self.__on_loops_changed)

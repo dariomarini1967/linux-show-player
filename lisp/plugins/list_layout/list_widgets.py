@@ -39,7 +39,6 @@ class HotKeyWidget(QLabel):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAlignment(Qt.AlignCenter)
         item.cue.changed("controller").connect(self.__update, Connection.QtQueued)
-        # if hasattr(item.cue,'controller'):
         self.__update(item.cue.controller)
         
     def __update(self, oneController):
@@ -47,6 +46,21 @@ class HotKeyWidget(QLabel):
             super().setText(oneController['keyboard'][0][0])
         else:
             super().setText('')
+
+class RepeatWidget(QLabel):
+    def __init__(self, item, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAlignment(Qt.AlignCenter)
+        self.__update(item.cue.media._GstMedia__loop)
+        # set signal handler so that self.__update is called when item.cue.media._GstMedia__loop changes
+        item.cue.media.changed("loop").connect(self.__update, Connection.QtQueued)
+        
+    def __update(self, whichMedia):
+        if whichMedia == -1:
+            super().setText(u"\u221E") # infinity symbol
+        else:
+            super().setText(str(whichMedia) if whichMedia is not None else '')
 
 class IndexWidget(QLabel):
     def __init__(self, item, *args, **kwargs):
