@@ -73,7 +73,6 @@ class CueListView(QTreeWidget):
     # TODO: add ability to show/hide
     # TODO: implement columns (cue-type / target / etc..)
     COLUMNS = [
-        ListColumn("Hotkey", HotKeyWidget, QHeaderView.ResizeToContents),
         ListColumn("", CueStatusIcons, QHeaderView.Fixed, width=45),
         ListColumn("#", IndexWidget, QHeaderView.ResizeToContents),
         ListColumn(
@@ -91,6 +90,7 @@ class CueListView(QTreeWidget):
             QT_TRANSLATE_NOOP("ListLayoutHeader", "Post wait"), PostWaitWidget
         ),
         ListColumn("", NextActionIcon, QHeaderView.Fixed, width=18),
+        ListColumn("Hotkey", HotKeyWidget, QHeaderView.ResizeToContents),
         ListColumn("Repeat", RepeatWidget, QHeaderView.ResizeToContents),
     ]
 
