@@ -16,6 +16,7 @@
 # along with Linux Show Player.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import re
 
 import jack
 from PyQt5.QtCore import Qt
@@ -31,6 +32,9 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox,
     QPushButton,
     QVBoxLayout,
+    QFrame,
+    QCheckBox,
+    QMessageBox
 )
 
 from lisp.plugins.gst_backend.elements.jack_sink import JackSink
@@ -212,6 +216,8 @@ class ConnectionsWidget(QWidget):
 class JackConnectionsDialog(QDialog):
     def __init__(self, jack_client, parent=None, **kwargs):
         super().__init__(parent)
+        self.setWindowTitle("JACK CONNECTIONS editor")
+
 
         self.resize(600, 400)
 
@@ -227,6 +233,9 @@ class JackConnectionsDialog(QDialog):
         self.output_widget.itemCollapsed.connect(self.connections_widget.update)
         self.input_widget.itemExpanded.connect(self.connections_widget.update)
         self.input_widget.itemCollapsed.connect(self.connections_widget.update)
+
+        self.stereo_mode_checkbox = QCheckBox("Stereo mode")
+        self.stereo_mode_checkbox.setChecked(True)  # Set to True by default
 
         self.input_widget.itemSelectionChanged.connect(
             self.__input_selection_changed
@@ -246,7 +255,27 @@ class JackConnectionsDialog(QDialog):
         self.connectButton = QPushButton(self)
         self.connectButton.clicked.connect(self.__disconnect_selected)
         self.connectButton.setEnabled(False)
-        self.layout().addWidget(self.connectButton, 1, 1)
+
+        self.disconnect_all_button = QPushButton(self)
+        self.disconnect_all_button.clicked.connect(self.__disconnect_all)
+        self.disconnect_all_button.setText("Disconnect all")
+
+        # Create a horizontal layout to center the controls (i.e. the 2 buttons and the checkbox)
+        button_layout = QHBoxLayout()
+        button_layout.addStretch()  # Add stretch to push controls to the center
+        button_layout.addWidget(self.connectButton)
+        button_layout.addWidget(self.disconnect_all_button)
+        button_layout.addWidget(self.stereo_mode_checkbox)
+        button_layout.addStretch()  # Add stretch to push controls tons to the center
+
+        # Create a QFrame to hold the button layout and add a border
+        button_frame = QFrame(self)
+        button_frame.setLayout(button_layout)
+        button_frame.setFrameShape(QFrame.StyledPanel)
+        button_frame.setFrameShadow(QFrame.Raised)
+
+        # Add the button layout to the main layout
+        self.layout().addWidget(button_frame, 1, 1, 1, 1)
 
         self.dialogButtons = QDialogButtonBox(
             QDialogButtonBox.Cancel | QDialogButtonBox.Ok
@@ -263,6 +292,8 @@ class JackConnectionsDialog(QDialog):
 
         self.connections = []
         self.update_graph()
+        self.input_widget.expandAll()
+
 
     def retranslateUi(self):
         self.output_widget.setHeaderLabels(
@@ -338,15 +369,57 @@ class JackConnectionsDialog(QDialog):
                 self.connectButton.clicked.connect(self.__connect_selected)
         else:
             self.connectButton.setEnabled(False)
-
+        # Check if there are any connections set
+        if any(self.connections):
+            self.disconnect_all_button.setEnabled(True)
+        else:
+            self.disconnect_all_button.setEnabled(False)
+   
     def __connect_selected(self):
         output = self.output_widget.indexOfTopLevelItem(self.__selected_out)
         self.connections[output].append(self.__selected_in.name)
+        if self.stereo_mode_checkbox.isChecked():
+            # stereo mode: checking if next pain of output and input ports are available for automatically connecting channel 2
+            # first, calculate name of next input port
+            match = re.match(r"^(.*?)(\d+)$", self.__selected_in.name)
+            if match:
+                base_name, number = match.groups()
+                next_input_port_name = f"{base_name}{int(number) + 1}"
+            else:
+                next_input_port_name = self.__selected_in.name + "_1"
+            # then, check availability of next input port
+            available_input_ports = self.__jack_client.get_ports()
+            if next_input_port_name in [one_port.name for one_port in available_input_ports]:
+                # input port is available, so check if output port is available: as output port is identified simply by an index, increment by 1 and check
+                next_output = output + 1
+                if(next_output < self.output_widget.topLevelItemCount()):
+                    # both input and outpuport are available, connect channel 2
+                    self.connections[next_output].append(next_input_port_name)
+                else:
+                    QMessageBox.information(
+                        self,
+                        "No output ports left",
+                        "No output ports are available for stereo mode.",
+                        QMessageBox.Ok
+                    )
+            else:
+                QMessageBox.information(
+                    self,
+                    "No input ports left",
+                    "No input ports are available for stereo mode.",
+                    QMessageBox.Ok
+                )
         self.connections_widget.update()
         self.__check_selection()
 
     def __disconnect_selected(self):
         output = self.output_widget.indexOfTopLevelItem(self.__selected_out)
         self.connections[output].remove(self.__selected_in.name)
+        self.connections_widget.update()
+        self.__check_selection()
+
+    def __disconnect_all(self):
+        for output in range(len(self.connections)):
+            self.connections[output] = []
         self.connections_widget.update()
         self.__check_selection()
