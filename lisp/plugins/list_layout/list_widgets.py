@@ -43,9 +43,12 @@ class HotKeyWidget(QLabel):
         
     def __update(self, oneController):
         if 'keyboard' in oneController:
-            super().setText(oneController['keyboard'][0][0])
-        else:
-            super().setText('')
+            # check if oneController['keyboard'] contains a bidimensional array
+            if len(oneController['keyboard'])>0:
+                if len(oneController['keyboard'][0])>0:
+                    super().setText(oneController['keyboard'][0][0])
+                    return
+        super().setText('')
 
 class RepeatWidget(QLabel):
     def __init__(self, item, *args, **kwargs):
