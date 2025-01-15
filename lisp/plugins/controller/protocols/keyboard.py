@@ -83,7 +83,11 @@ class KeyboardSettings(SettingsPage):
         self.setGroupEnabled(self.keyGroup, enabled)
 
     def getSettings(self):
-        return {"keyboard": self.keyboardModel.rows}
+        # fix: return empty when checkbox for keyboard is not selected;
+        # originally, this class did not manage checkbox
+        if self.isGroupEnabled(self.keyGroup):
+            return {"keyboard": self.keyboardModel.rows}
+        return {}
 
     def loadSettings(self, settings):
         for key, action in settings.get("keyboard", []):
@@ -97,6 +101,7 @@ class KeyboardSettings(SettingsPage):
 
 
 class KeyboardCueSettings(KeyboardSettings, CuePageMixin):
+    displayedFirst=True
     def __init__(self, cueType, **kwargs):
         super().__init__(
             actionDelegate=CueActionDelegate(

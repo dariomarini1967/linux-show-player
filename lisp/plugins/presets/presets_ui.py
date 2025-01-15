@@ -323,6 +323,7 @@ class PresetsDialog(QDialog):
         if item is not None:
             preset_name = item.text()
             try:
+                # does not work
                 cues = self.app.layout.get_selected_cues()
                 if cues:
                     load_on_cues(self.app, preset_name, cues)

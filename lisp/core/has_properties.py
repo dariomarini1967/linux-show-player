@@ -203,6 +203,11 @@ class HasProperties(metaclass=HasPropertiesMeta):
                 if isinstance(current, HasProperties):
                     current.update_properties(value)
                 else:
+                    # fix to avoid that some elements in "controller" (i.e. "osc","midi","keyboard") are lost when relative checkbox is not selected
+                    #if name == "controller":   
+                    #    for key in current.keys():
+                    #        if key not in value:
+                    #            value[key] = current[key]
                     setattr(self, name, value)
 
     def changed(self, name):

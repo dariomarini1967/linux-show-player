@@ -298,6 +298,10 @@ class OscSettings(SettingsPage):
         self.setGroupEnabled(self.oscGroup, enabled)
 
     def getSettings(self):
+        # fix: return empty when checkbox for osc is not selected;
+        # originally, this class did not manage checkbox
+        if not self.isGroupEnabled(self.oscGroup):
+            return {}
         entries = []
         for row in self.oscModel.rows:
             message = Osc.key_from_values(row[0], row[1], row[2])

@@ -51,6 +51,10 @@ class CueSettingsDialog(QDialog):
         self.setLayout(QVBoxLayout())
 
         if isinstance(cue, type):
+            # multiple selections here?
+            self.setWindowTitle(
+                "Edit selected cues"
+            )
             if issubclass(cue, Cue):
                 cue_properties = cue.class_defaults()
                 cue_class = cue
@@ -60,7 +64,7 @@ class CueSettingsDialog(QDialog):
                     f"not {cue.__name__}"
                 )
         elif isinstance(cue, Cue):
-            self.setWindowTitle(cue.name)
+            self.setWindowTitle("Edit cue "+cue.name)
             cue_properties = cue.properties()
             cue_class = cue.__class__
         else:
@@ -82,10 +86,12 @@ class CueSettingsDialog(QDialog):
                 settings_widget = page(cue_class)
             else:
                 settings_widget = page()
-
-            settings_widget.loadSettings(cue_properties)
-            settings_widget.enableCheck(cue is cue_class)
-            self.mainPage.addPage(settings_widget)
+            from lisp.plugins.controller.controller_settings import CueControllerSettingsPage
+            if not cue is cue_class or not isinstance(settings_widget,CueControllerSettingsPage):
+                settings_widget.loadSettings(cue_properties)
+                # display checkboxes if multiple selection
+                settings_widget.enableCheck(cue is cue_class)
+                self.mainPage.addPage(settings_widget)
 
         self.dialogButtons = QDialogButtonBox(self)
         self.dialogButtons.setStandardButtons(

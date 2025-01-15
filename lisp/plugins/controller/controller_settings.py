@@ -22,7 +22,7 @@ from lisp.ui.settings.pages import SettingsPagesTabWidget, CuePageMixin
 
 
 class CueControllerSettingsPage(SettingsPagesTabWidget, CuePageMixin):
-    Name = QT_TRANSLATE_NOOP("SettingsPageName", "Cue Control")
+    Name = QT_TRANSLATE_NOOP("SettingsPageName", "Keyboard, OSC, MIDI")
 
     def __init__(self, cueType, **kwargs):
         super().__init__(cueType=cueType, **kwargs)

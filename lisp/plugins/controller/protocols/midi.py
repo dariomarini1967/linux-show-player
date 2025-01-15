@@ -131,6 +131,10 @@ class MidiSettings(SettingsPage):
         self.setGroupEnabled(self.midiGroup, enabled)
 
     def getSettings(self):
+        # fix: return empty when checkbox for midi is not selected;
+        # originally, this class did not manage checkbox
+        if not self.isGroupEnabled(self.midiGroup):
+            return {}
         entries = []
         for row in range(self.midiModel.rowCount()):
             message, action = self.midiModel.getMessage(row)

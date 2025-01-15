@@ -57,6 +57,11 @@ class AlsaSinkSettings(SettingsPage):
         self.helpLabel.setWordWrap(True)
         self.deviceGroup.layout().addWidget(self.helpLabel)
 
+        self.darioLabel = QLabel(self.deviceGroup)
+        self.darioLabel.setWordWrap(True)
+        self.darioLabel.setText("messaggio di prova")
+        self.deviceGroup.layout().addWidget(self.darioLabel)
+
         self.retranslateUi()
 
     def retranslateUi(self):

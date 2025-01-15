@@ -64,3 +64,8 @@ optional arguments:
                         Change output verbosity. default: warning
   --locale LOCALE       Force specified locale/language
 ```
+
+### Notes by Dario Marini
+
+- poetry must be installed locally forcing version 1.8.2, command is
+pip install poetry==1.8.2

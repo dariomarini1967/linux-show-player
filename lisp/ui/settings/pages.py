@@ -91,7 +91,12 @@ class SettingsPagesTabWidget(SettingsPage):
 
     def addPage(self, page):
         self._pages.append(page)
-        self.tabWidget.addTab(page, translate("SettingsPageName", page.Name))
+        # enhancement: keyboard shotrcut tab is the first one and selcted by default as more important for me
+        if hasattr(page, 'displayedFirst'):
+            self.tabWidget.insertTab(0, page, translate("SettingsPageName", page.Name))
+            self.tabWidget.setCurrentIndex(0)
+        else:
+            self.tabWidget.addTab(page, translate("SettingsPageName", page.Name))
 
     def removePage(self, index):
         self.tabWidget.removeTab(index)
