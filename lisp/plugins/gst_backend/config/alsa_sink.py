@@ -20,9 +20,9 @@ from PyQt5.QtCore import QT_TRANSLATE_NOOP
 from lisp.plugins.gst_backend.elements.alsa_sink import AlsaSink
 from lisp.plugins.gst_backend.settings.alsa_sink import AlsaSinkSettings
 
-
+# displayed in Preferences dialog box
 class AlsaSinkConfig(AlsaSinkSettings):
-    Name = QT_TRANSLATE_NOOP("SettingsPageName", "ALSA Default Device")
+    Name = QT_TRANSLATE_NOOP("SettingsPageName", "Audio Output Default Device")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

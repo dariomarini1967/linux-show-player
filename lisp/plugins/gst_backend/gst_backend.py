@@ -85,6 +85,12 @@ class GstBackend(Plugin, BaseBackend):
         elements.load()
         settings.load()
 
+        # comment by Dario:
+        # here parameters set in gst_backend.json are stored in CurrentBackend.Config;
+        # actualy they come from self.Config;
+        # you can access them everywhere in the project accessing backend.CurrentBackend.Config 
+        # after importing backend module
+        # CurrentBackend seems a class storing general preferences, actually it is built once at the very beginning
         backend.set_backend(self)
 
     def uri_duration(self, uri):

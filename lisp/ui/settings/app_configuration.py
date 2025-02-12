@@ -92,6 +92,8 @@ class AppConfigurationDialog(QDialog):
                 model_index = model_parent
             else:
                 page_instance = page_class()
+                # comment by Dario:
+                # at least preferences dialog box is populated here
                 page_instance.loadSettings(config)
                 model_index = self.model.addPage(
                     page_instance, parent=model_parent

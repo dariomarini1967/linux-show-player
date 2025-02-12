@@ -95,6 +95,8 @@ class PluginsManager:
                 # Configuration for file
                 default_config_path = self.FALLBACK_CONFIG_PATH
 
+            # comment by Dario
+            # plugin could be class 'lisp.plugins.gst_backend.gst_backend.GstBackend'
             plugin.Config = JSONFileConfiguration(
                 user_config_path, default_config_path
             )

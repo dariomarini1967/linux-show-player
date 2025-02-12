@@ -104,6 +104,7 @@ class JackSinkSettings(SettingsPage):
         self.setGroupEnabled(self.jackGroup, enabled)
 
     def __edit_connections(self):
+        # invoked when editing jack connections for given selected cue
         dialog = JackConnectionsDialog(self.__jack_client, parent=self)
         dialog.set_connections(self.connections.copy())
         dialog.exec()

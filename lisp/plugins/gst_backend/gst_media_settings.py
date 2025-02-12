@@ -59,6 +59,10 @@ class GstMediaSettings(SettingsPage):
         self.pipeButton.clicked.connect(self.__edit_pipe)
 
     def loadSettings(self, settings):
+        # comment by Dario:
+        # settings is a dictionary containing all parameters of current cue; we need here media that is in turn another dictionary;
+        # so, to get the current jack connections:
+        # settings.get("media").get("elements").get("JackSink").get("connections")
         settings = settings.get("media", {})
         # Create a local copy of the configuration
         self._settings = deepcopy(settings)
@@ -71,6 +75,10 @@ class GstMediaSettings(SettingsPage):
             if page is not None and issubclass(page, SettingsPage):
                 page = page(parent=self)
                 page.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+                # comment by Dario:
+                # jack connections for current cue are obtained here;
+                # page.Name is 'JACKOut', page class is lisp.plugins.gst_backend.settings.jack_sink.JackSinkSettings
+                
                 page.loadSettings(
                     settings.get("elements", {}).get(
                         element, page.ELEMENT.class_defaults()

@@ -86,6 +86,14 @@ class JackSink(GstMediaElement):
 
     @classmethod
     def default_connections(cls, client):
+        # added by Dario; check if default connections are set in preferences, i.e. in gst_backend.json
+        # there should be key "default_jack_connections"
+        from lisp import backend
+        config = backend.CurrentBackend.Config
+        if "default_jack_connections" in config:
+            connections = config["default_jack_connections"]
+            return connections
+        
         # Up to 8 channels
         connections = [[] for _ in range(8)]
 
@@ -123,6 +131,8 @@ class JackSink(GstMediaElement):
         return n
 
     def __jack_connect(self):
+        # comment by Dario
+        # invoked when cue starts playing; here connection to defined jack ports is performed
         out_ports = JackSink._ControlClient.get_ports(
             name_pattern="^" + self._client_name + ":.+", is_audio=True
         )
@@ -148,7 +158,7 @@ class JackSink(GstMediaElement):
                         )
                     except jack.JackError:
                         logger.exception(
-                            "An error occurred while connecting Jack ports"
+                            "An error occurred while connecting port "+out_ports[output].name+" to port "+input_name
                         )
                 else:
                     break

@@ -21,13 +21,21 @@ from PyQt5.QtWidgets import (
     QComboBox,
     QLabel,
     QVBoxLayout,
+    QPushButton
 )
 from pyalsa import alsacard
 
 from lisp.plugins.gst_backend import GstBackend
 from lisp.plugins.gst_backend.elements.alsa_sink import AlsaSink
+from lisp.plugins.gst_backend.settings.jack_sink import JackConnectionsDialog
 from lisp.ui.settings.pages import SettingsPage
 from lisp.ui.ui_utils import translate
+
+import logging
+import jack
+
+logger = logging.getLogger(__name__)
+
 
 
 class AlsaSinkSettings(SettingsPage):
@@ -63,6 +71,36 @@ class AlsaSinkSettings(SettingsPage):
         self.deviceGroup.layout().addWidget(self.darioLabel)
 
         self.retranslateUi()
+        
+        # Create a new button
+        open_jack_connections_button = QPushButton("Open Jack Connections", self)
+        # Add the button to the layout
+        self.layout().addWidget(open_jack_connections_button)
+        # Connect the button's clicked signal to a slot that opens the JackConnectionsDialog
+        open_jack_connections_button.clicked.connect(self.open_jack_connections_dialog)
+
+    def open_jack_connections_dialog(self):
+        # Create and show the JackConnectionsDialog
+        self._temp_jack_client = None
+        try:
+            self._temp_jack_client = jack.Client(
+                "LinuxShowPlayer_SettingsControl", no_start_server=True
+            )
+        except jack.JackError:
+            # Disable the widget
+            self.setEnabled(False)
+            logger.error(
+                "Cannot connect with a running Jack server.", exc_info=True
+            )
+
+        dialog = JackConnectionsDialog(self._temp_jack_client, parent=self)
+        from lisp.plugins.gst_backend.elements.jack_sink import JackSink
+        dialog.set_connections(JackSink.default_connections(self._temp_jack_client).copy())
+        dialog.exec()
+        if dialog.result() == dialog.Accepted:
+            from lisp import backend
+            backend.CurrentBackend.Config["default_jack_connections"] = dialog.connections
+            backend.CurrentBackend.Config.write()
 
     def retranslateUi(self):
         self.deviceGroup.setTitle(translate("AlsaSinkSettings", "ALSA device"))
