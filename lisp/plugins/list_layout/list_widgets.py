@@ -51,13 +51,14 @@ class HotKeyWidget(QLabel):
         super().setText('')
 
 class RepeatWidget(QLabel):
-    def __init__(self, item, *args, **kwargs):
+    def __init__(self, item, *args, **kwargs):        
         super().__init__(*args, **kwargs)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAlignment(Qt.AlignCenter)
-        self.__update(item.cue.media._GstMedia__loop)
-        # set signal handler so that self.__update is called when item.cue.media._GstMedia__loop changes
-        item.cue.media.changed("loop").connect(self.__update, Connection.QtQueued)
+        if hasattr(item.cue, 'media'):
+            self.__update(item.cue.media._GstMedia__loop)
+            # set signal handler so that self.__update is called when item.cue.media._GstMedia__loop changes
+            item.cue.media.changed("loop").connect(self.__update, Connection.QtQueued)
         
     def __update(self, whichMedia):
         if whichMedia == -1:
