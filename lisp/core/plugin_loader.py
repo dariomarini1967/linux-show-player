@@ -110,9 +110,19 @@ class PluginsLoader:
                 )
             )
         except Exception as e:
+            # If plugin initialization failed, ensure the plugin class
+            # does not remain marked as 'Loaded' (super().__init__ may
+            # have set the Loaded flag before the initialization error).
+            try:
+                plugin.State &= ~PluginState.Loaded
+            except Exception:
+                # Be defensive: if plugin.State isn't settable for some
+                # reason, continue to record the failure.
+                pass
+
             self.failed.add(plugin)
             raise PluginInitFailedException(
-                f'Failed to initialize plugin: "{plugin.Name}"'
+                f'--> Failed to initialize plugin: "{plugin.Name}"'
             ) from e
 
     def _should_resolve(self, plugin: Type[Plugin]) -> bool:

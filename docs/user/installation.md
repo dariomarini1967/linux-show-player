@@ -74,7 +74,7 @@ What follows are guidelines to run LiSP without a "proper" installation, **if so
 To start, you'll need to install these packages using your package manager:
 
 ```{tab} Debian/Ubuntu/Mint
- * `python3` (>= 3.8)
+ * `python3` (>= 3.10)
  * `python3-dev`
  * `python3-poetry` (>= 1.2, otherwise follow <a href="https://python-poetry.org/docs/#installation" target="_blank">these instructions</a>)
  * `gstreamer1.0-plugins-good`
@@ -85,13 +85,11 @@ To start, you'll need to install these packages using your package manager:
  * `libasound2-dev`
  * `libgirepository1.0-dev`
  * `libcairo2-dev`
- * `liblo7`
- * `liblo-dev`
  * `librtmidi6`
 ```
 
 ```{tab} Fedora/CentOS
- * `python3` (>= 3.8)
+ * `python3` (>= 3.10)
  * `python3-devel`
  * `poetry` (>= 1.2, otherwise follow <a href="https://python-poetry.org/docs/#installation" target="_blank">these instructions</a>)
  * `gstreamer1-plugins-good`
@@ -102,8 +100,6 @@ To start, you'll need to install these packages using your package manager:
  * `alsa-lib-devel`
  * `gobject-introspection-devel`
  * `cairo-gobject-devel`
- * `liblo`
- * `liblo-devel`
  * `rtmidi`
 ```
 
@@ -117,7 +113,6 @@ To start, you'll need to install these packages using your package manager:
  * `alsa-lib`
  * `cairo`
  * `gobject-introspection`
- * `liblo`
  * `rtmidi`
 ```
 
@@ -131,12 +126,7 @@ To start, you'll need to install these packages using your package manager:
  * `alsa-lib`
  * `cairo`
  * `gobject-introspection`
- * `liblo`
  * `rtmidi`
-```
-
-```{hint}
-You might also want to install `ola`, for ArtNet timecode, however, using the method described here, it's not possile to use it. 
 ```
 
 ### Download

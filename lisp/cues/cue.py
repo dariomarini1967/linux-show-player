@@ -86,6 +86,7 @@ class Cue(HasProperties):
     :ivar id: Identify the cue uniquely. Should NEVER change after init.
     :ivar index: Cue position in the view.
     :ivar name: Cue visualized name.
+    :ivar icon: Cue icon file name.
     :ivar description: Cue text description.
     :ivar stylesheet: Cue style, used by the view.
     :ivar duration: The cue duration in milliseconds. (0 means no duration)
@@ -116,6 +117,7 @@ class Cue(HasProperties):
     _type_ = WriteOnceProperty()
     id = WriteOnceProperty()
     name = Property(default="Untitled")
+    icon = Property(default="led")
     index = Property(default=-1)
     description = Property(default="")
     stylesheet = Property(default="")
@@ -273,23 +275,29 @@ class Cue(HasProperties):
             if self._state & CueState.IsRunning:
                 return
 
-            state = self._state
+            # Save the initial state,
+            # we need this to decide if we should start a post-wait
+            init_state = self._state
 
-            # PreWait
-            if self.pre_wait and state & (
+            # PreWait (blocking)
+            if self.pre_wait and init_state & (
                 CueState.IsStopped | CueState.PreWait_Pause
             ):
                 self._state = CueState.PreWait
+
                 # Start the wait, the lock is released during the wait and
                 # re-acquired after
-                if not self._prewait.wait(self.pre_wait, lock=self._st_lock):
+                if self._prewait.wait(self.pre_wait, lock=self._st_lock):
+                    # PreWait ended
+                    self._state ^= CueState.PreWait
+                else:
                     # PreWait interrupted, check the state to be correct
                     if self._state & CueState.PreWait:
                         self._state ^= CueState.PreWait
                     return
 
-            # Cue-Start (still locked), the __start__ function should not block
-            if state & (
+            # Cue-Start, the __start__ function should not block
+            if init_state & (
                 CueState.IsStopped | CueState.Pause | CueState.PreWait_Pause
             ):
                 running = self.__start__(fade)
@@ -299,8 +307,8 @@ class Cue(HasProperties):
                 if not running:
                     self._ended()
 
-            # PostWait (still locked)
-            if state & (
+            # PostWait (blocking)
+            if init_state & (
                 CueState.IsStopped
                 | CueState.PreWait_Pause
                 | CueState.PostWait_Pause
@@ -309,8 +317,13 @@ class Cue(HasProperties):
                     self.next_action == CueNextAction.TriggerAfterWait
                     or self.next_action == CueNextAction.SelectAfterWait
                 ):
+                    if self._state & CueState.PostWait_Pause:
+                        self._state ^= CueState.PostWait_Pause
+
                     self._state |= CueState.PostWait
 
+                    # Start the wait, the lock is released during the wait and
+                    # re-acquired after
                     if self._postwait.wait(self.post_wait, lock=self._st_lock):
                         # PostWait ended
                         self._state ^= CueState.PostWait

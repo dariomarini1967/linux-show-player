@@ -39,9 +39,19 @@ class IndexActionCue(Cue):
     Name = QT_TRANSLATE_NOOP("CueName", "Index Action")
     Category = QT_TRANSLATE_NOOP("CueCategory", "Action cues")
 
+    CueActions = (
+        CueAction.Default,
+        CueAction.Start,
+        CueAction.Stop,
+        CueAction.Pause,
+        CueAction.Resume,
+        CueAction.Interrupt,
+    )
+
     target_index = Property(default=0)
     relative = Property(default=True)
     action = Property(default=CueAction.Stop.value)
+    icon = Property("bullseye")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

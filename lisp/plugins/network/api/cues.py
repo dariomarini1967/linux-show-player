@@ -18,6 +18,7 @@
 import json
 
 import falcon
+from falcon import Request, Response
 
 from lisp.cues.cue import CueAction
 from lisp.plugins.network.endpoint import EndPoint
@@ -35,45 +36,45 @@ def resolve_cue(app, cue_id):
 class CuesListEndPoint(EndPoint):
     UriTemplate = "/cues"
 
-    def on_get(self, request, response):
+    def on_get(self, request: Request, response: Response):
         response.status = falcon.HTTP_OK
-        response.body = json.dumps({"cues": tuple(self.app.cue_model.keys())})
+        response.text = json.dumps({"cues": tuple(self.app.cue_model.keys())})
 
 
 class CueEndPoint(EndPoint):
     UriTemplate = "/cues/{cue_id}"
 
-    def on_get(self, request, response, cue_id):
+    def on_get(self, request: Request, response: Response, cue_id):
         cue = resolve_cue(self.app, cue_id)
 
         response.status = falcon.HTTP_OK
-        response.body = json.dumps(cue.properties())
+        response.text = json.dumps(cue.properties())
 
 
 class CueActionEndPoint(EndPoint):
     UriTemplate = "/cues/{cue_id}/action"
 
-    def on_post(self, request, response, cue_id):
+    def on_post(self, request: Request, response: Response, cue_id):
         cue = resolve_cue(self.app, cue_id)
 
         try:
-            data = json.load(request.stream)
-            action = CueAction(data["action"])
+            data = request.get_media()
+            action = CueAction(data.get("action"))
 
             cue.execute(action=action)
             response.status = falcon.HTTP_CREATED
-        except (KeyError, json.JSONDecodeError):
+        except ValueError:
             response.status = falcon.HTTP_BAD_REQUEST
 
 
 class CueStateEndPoint(EndPoint):
     UriTemplate = "/cues/{cue_id}/state"
 
-    def on_get(self, request, response, cue_id):
+    def on_get(self, request: Request, response: Response, cue_id):
         cue = resolve_cue(self.app, cue_id)
 
         response.status = falcon.HTTP_OK
-        response.body = json.dumps(
+        response.text = json.dumps(
             {
                 "state": cue.state,
                 "current_time": cue.current_time(),

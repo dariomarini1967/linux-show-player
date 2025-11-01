@@ -18,8 +18,8 @@
 import logging
 import subprocess
 
-from PyQt5.QtCore import Qt, QT_TRANSLATE_NOOP
-from PyQt5.QtWidgets import QVBoxLayout, QGroupBox, QLineEdit, QCheckBox
+from PyQt5.QtCore import QT_TRANSLATE_NOOP, Qt
+from PyQt5.QtWidgets import QCheckBox, QGroupBox, QLineEdit, QVBoxLayout
 
 from lisp import RUNNING_IN_FLATPAK
 from lisp.core.decorators import async_function
@@ -40,13 +40,22 @@ class CommandCue(Cue):
 
     Name = QT_TRANSLATE_NOOP("CueName", "Command Cue")
     Category = None
-    CueActions = (CueAction.Default, CueAction.Start, CueAction.Stop)
+
+    CueActions = (
+        CueAction.Default,
+        CueAction.Start,
+        CueAction.Stop,
+        CueAction.Pause,
+        CueAction.Resume,
+        CueAction.Interrupt,
+    )
 
     command = Property(default="")
     no_output = Property(default=True)
     no_error = Property(default=True)
     kill = Property(default=False)
     run_on_host = Property(default=True)
+    icon = Property("prompt")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -15,14 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with Linux Show Player.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QRect, Qt, QSize
+from PyQt5.QtCore import QRect, QSize, Qt
 from PyQt5.QtGui import (
-    QPainter,
     QBrush,
     QColor,
-    QPen,
-    QPainterPath,
     QFontDatabase,
+    QPainter,
+    QPainterPath,
+    QPen,
 )
 from PyQt5.QtWidgets import QLabel, QProgressBar, QWidget
 
@@ -107,7 +107,7 @@ class NameWidget(QLabel):
 
 
 class CueStatusIcons(QWidget):
-    MARGIN = 6
+    MARGIN = 5
 
     def __init__(self, item, *args):
         super().__init__(*args)
@@ -116,6 +116,9 @@ class CueStatusIcons(QWidget):
         self._icon = None
         self._item = item
 
+        self._item.cue.changed("icon").connect(
+            self.updateIcon, Connection.QtQueued
+        )
         self._item.cue.interrupted.connect(self.updateIcon, Connection.QtQueued)
         self._item.cue.started.connect(self.updateIcon, Connection.QtQueued)
         self._item.cue.stopped.connect(self.updateIcon, Connection.QtQueued)
@@ -127,13 +130,13 @@ class CueStatusIcons(QWidget):
 
     def updateIcon(self):
         if self._item.cue.state & CueState.Running:
-            self._icon = IconTheme.get("led-running")
+            self._icon = IconTheme.get(f"{self._item.cue.icon}-running")
         elif self._item.cue.state & CueState.Pause:
-            self._icon = IconTheme.get("led-pause")
+            self._icon = IconTheme.get(f"{self._item.cue.icon}-pause")
         elif self._item.cue.state & CueState.Error:
-            self._icon = IconTheme.get("led-error")
+            self._icon = IconTheme.get(f"{self._item.cue.icon}-error")
         else:
-            self._icon = None
+            self._icon = IconTheme.get(self._item.cue.icon)
 
         self.update()
 
@@ -221,19 +224,21 @@ class TimeWidget(QProgressBar):
         self.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
 
         self.cue = item.cue
-        self.accurateTime = True
+        self.duration = 0
         self.showZeroDuration = False
 
     def _updateTime(self, time):
         self.setValue(time)
-        self.setFormat(strtime(time, accurate=self.accurateTime))
+        self.setFormat(strtime(time, accurate=1))
 
     def _updateDuration(self, duration):
+        self.duration = duration
+
         if duration > 0 or self.showZeroDuration:
             # Display as disabled if duration < 0
             self.setEnabled(duration > 0)
             self.setTextVisible(True)
-            self.setFormat(strtime(duration, accurate=self.accurateTime))
+            self.setFormat(strtime(duration, accurate=2))
             # Avoid settings min and max to 0, or the bar go in busy state
             self.setRange(0 if duration > 0 else -1, int(duration))
         else:
@@ -309,6 +314,10 @@ class PreWaitWidget(TimeWidget):
         self.waitTime = CueWaitTime(self.cue, mode=CueWaitTime.Mode.Pre)
         self.waitTime.notify.connect(self._updateTime, Connection.QtQueued)
 
+    def _updateTime(self, time):
+        self.setValue(time)
+        self.setFormat(strtime(self.duration - time, accurate=1))
+
     def _updateDuration(self, duration):
         # The wait time is in seconds, we need milliseconds
         super()._updateDuration(duration * 1000)
@@ -331,6 +340,10 @@ class PostWaitWidget(TimeWidget):
         self.cueTime = CueTime(self.cue)
 
         self._nextActionChanged(self.cue.next_action)
+
+    def _updateTime(self, time):
+        self.setValue(time)
+        self.setFormat(strtime(self.duration - time, accurate=1))
 
     def _updateDuration(self, duration):
         if (

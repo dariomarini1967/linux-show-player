@@ -21,12 +21,12 @@ from PyQt5.QtCore import QT_TRANSLATE_NOOP
 from PyQt5.QtWidgets import QVBoxLayout
 
 from lisp.core.properties import Property
-from lisp.cues.cue import Cue
+from lisp.cues.cue import Cue, CueAction
 from lisp.plugins import get_plugin
 from lisp.plugins.midi.midi_utils import (
-    midi_str_to_dict,
     midi_dict_to_str,
     midi_from_str,
+    midi_str_to_dict,
 )
 from lisp.plugins.midi.widgets import MIDIMessageEdit
 from lisp.ui.settings.cue_settings import CueSettingsRegistry
@@ -39,7 +39,17 @@ logger = logging.getLogger(__name__)
 class MidiCue(Cue):
     Name = QT_TRANSLATE_NOOP("CueName", "MIDI Cue")
 
+    CueActions = (
+        CueAction.Default,
+        CueAction.Start,
+        CueAction.Stop,
+        CueAction.Pause,
+        CueAction.Resume,
+        CueAction.Interrupt,
+    )
+
     message = Property(default="")
+    icon = Property("midi")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
