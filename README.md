@@ -71,5 +71,5 @@ optional arguments:
 
 ### Notes by Dario Marini
 
-- poetry must be installed locally forcing version 1.8.2, command is
-pip install poetry==1.8.2
+- poetry must be installed locally, latest version is recomended (2.2.1); command is
+curl -sSL https://install.python-poetry.org | python3 - 

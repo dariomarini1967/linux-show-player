@@ -27,6 +27,8 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox,
     QWidget,
     QListWidgetItem,
+    QLabel,
+    QSizePolicy,
 )
 
 from lisp.plugins.gst_backend import elements
@@ -44,28 +46,40 @@ class GstPipeEdit(QWidget):
         self._app_mode = app_mode
 
         # Input selection
+        # right justify text
+
+        self.inputLabel = QLabel(translate("GstPipelineEdit", "Input"), self)
+        self.inputLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.layout().addWidget(self.inputLabel, 0, 0, 1, 1)
+        
         self.inputBox = QComboBox(self)
-        self.layout().addWidget(self.inputBox, 0, 0, 1, 3)
+        self.inputBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.layout().addWidget(self.inputBox, 0, 1, 1, 3)
         self.__init_inputs()
 
         # Current plugins list
         self.currentList = QListWidget(self)
         self.currentList.setDragEnabled(True)
         self.currentList.setDragDropMode(QAbstractItemView.InternalMove)
-        self.layout().addWidget(self.currentList, 1, 0)
+        self.layout().addWidget(self.currentList, 1, 0, 1, 2)
 
         # Available plugins list
         self.availableList = QListWidget(self)
-        self.layout().addWidget(self.availableList, 1, 2)
+        self.layout().addWidget(self.availableList, 1, 3, 1, 2)
 
         # Output selection
+        self.outputLabel = QLabel(translate("GstPipelineEdit", "Output"), self)
+        self.outputLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.layout().addWidget(self.outputLabel, 4, 0, 1, 1)
+        
         self.outputBox = QComboBox(self)
-        self.layout().addWidget(self.outputBox, 4, 0, 1, 3)
+        self.outputBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.layout().addWidget(self.outputBox, 4, 1, 1, 3)
         self.__init_outputs()
 
         # Add/Remove plugins buttons
         self.buttonsLayout = QVBoxLayout()
-        self.layout().addLayout(self.buttonsLayout, 1, 1)
+        self.layout().addLayout(self.buttonsLayout, 1, 2)
         self.layout().setAlignment(self.buttonsLayout, Qt.AlignHCenter)
 
         self.addButton = QPushButton(self)
@@ -86,13 +100,31 @@ class GstPipeEdit(QWidget):
     def set_pipe(self, pipe):
         if pipe:
             if not self._app_mode:
-                self.inputBox.setCurrentText(
-                    translate("MediaElementName", elements.input_name(pipe[0]))
-                )
+                # Select input by its canonical key (itemData) to avoid fragile
+                # selection by visible text. Also show both display name and
+                # canonical key in the combo items (see __init_inputs).
+                target_input = pipe[0]
+                found_index = -1
+                for i in range(self.inputBox.count()):
+                    if self.inputBox.itemData(i) == target_input:
+                        found_index = i
+                        break
 
-            self.outputBox.setCurrentText(
-                translate("MediaElementName", elements.output_name(pipe[-1]))
-            )
+                if found_index >= 0:
+                    self.inputBox.setCurrentIndex(found_index)
+
+            # Select output by its canonical key (itemData) instead of visible
+            # text. The visible text contains both the translated name and the
+            # element key.
+            target_output = pipe[-1]
+            found_index = -1
+            for i in range(self.outputBox.count()):
+                if self.outputBox.itemData(i) == target_output:
+                    found_index = i
+                    break
+
+            if found_index >= 0:
+                self.outputBox.setCurrentIndex(found_index)
 
         self.__init_current_plugins(pipe)
         self.__init_available_plugins(pipe)
@@ -111,10 +143,13 @@ class GstPipeEdit(QWidget):
         else:
             inputs_by_name = {}
             for key, input in elements.inputs().items():
+                # Map translated display name -> canonical key
                 inputs_by_name[translate("MediaElementName", input.Name)] = key
 
             for name in sorted(inputs_by_name):
-                self.inputBox.addItem(name, inputs_by_name[name])
+                display = f"{name} ({inputs_by_name[name]})"
+                # Visible text shows both name and key, data stores the key
+                self.inputBox.addItem(display, inputs_by_name[name])
 
             self.inputBox.setEnabled(self.inputBox.count() > 1)
 
@@ -124,7 +159,9 @@ class GstPipeEdit(QWidget):
             outputs_by_name[translate("MediaElementName", output.Name)] = key
 
         for name in sorted(outputs_by_name):
-            self.outputBox.addItem(name, outputs_by_name[name])
+            display = f"{name} ({outputs_by_name[name]})"
+            # Visible text shows both name and key, data stores the key
+            self.outputBox.addItem(display, outputs_by_name[name])
 
         self.outputBox.setEnabled(self.outputBox.count() > 1)
 
