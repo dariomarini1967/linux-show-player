@@ -45,13 +45,10 @@ class GstPipeEdit(QWidget):
 
         self._app_mode = app_mode
 
-        # Input selection
-        # right justify text
-
+        # Input selection (label & combo)
         self.inputLabel = QLabel(translate("GstPipelineEdit", "Input"), self)
         self.inputLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self.layout().addWidget(self.inputLabel, 0, 0, 1, 1)
-        
+        self.layout().addWidget(self.inputLabel, 0, 0, 1, 1)  
         self.inputBox = QComboBox(self)
         self.inputBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.layout().addWidget(self.inputBox, 0, 1, 1, 3)
@@ -67,11 +64,10 @@ class GstPipeEdit(QWidget):
         self.availableList = QListWidget(self)
         self.layout().addWidget(self.availableList, 1, 3, 1, 2)
 
-        # Output selection
+        # Output selection (label & combo)
         self.outputLabel = QLabel(translate("GstPipelineEdit", "Output"), self)
         self.outputLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.layout().addWidget(self.outputLabel, 4, 0, 1, 1)
-        
         self.outputBox = QComboBox(self)
         self.outputBox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.layout().addWidget(self.outputBox, 4, 1, 1, 3)
