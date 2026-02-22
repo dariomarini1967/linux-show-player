@@ -17,7 +17,7 @@
 
 import json
 import logging
-from os.path import exists, dirname, abspath
+from os.path import exists, dirname, abspath, realpath
 
 from PyQt5.QtWidgets import QDialog, qApp
 
@@ -193,7 +193,7 @@ class Application(metaclass=Singleton):
             "session": session_props,
             "cues": session_cues,
         }
-        
+
         if self.conf.get("session.minSave", False):
             dump_options = {"separators": (",", ":")}
         else:
@@ -206,13 +206,13 @@ class Application(metaclass=Singleton):
             logger.exception(
                 translate(
                     "ApplicationError",
-                    """
-                    Error while writing the session file "{}"\n
-                    Due to bad data, the session cannot be saved.
-                    Please check any recent changes to cue pipelines.
-                    """,
+                    "Saving your session failed due to bad data.\n"
+                    "The file still contains your last successful save and has not been overwritten.\n\n"
+                    "This is likely because of corrupted data from a plugin."
+                    " Try to revert recent changes to cues or settings, and save the file again.",
                 ).format(session_file)
             )
+
         else:
             with open(session_file, mode="w", encoding="utf-8") as file:
                 file.write(session_json)
@@ -236,7 +236,7 @@ class Application(metaclass=Singleton):
                 layout.get_layout(session_dict["session"]["layout_type"])
             )
             self.session.update_properties(session_dict["session"])
-            self.session.session_file = abspath(session_file)
+            self.session.session_file = realpath(abspath(session_file))
 
             # Load cues
             for cues_dict in session_dict.get("cues", {}):

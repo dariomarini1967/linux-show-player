@@ -33,7 +33,7 @@ from lisp.ui.ui_utils import translate
 
 
 class GstMediaSettings(SettingsPage):
-    Name = QT_TRANSLATE_NOOP("SettingsPageName", "Media Settings")
+    Name = QT_TRANSLATE_NOOP("SettingsPageName", "GST Pipeline")
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

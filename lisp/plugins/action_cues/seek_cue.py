@@ -16,19 +16,20 @@
 # along with Linux Show Player.  If not, see <http://www.gnu.org/licenses/>.
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QTime, QT_TRANSLATE_NOOP
+from PyQt5.QtCore import QT_TRANSLATE_NOOP, QTime
 from PyQt5.QtWidgets import (
-    QVBoxLayout,
     QGroupBox,
-    QPushButton,
-    QLabel,
     QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QDateTimeEdit,
     QTimeEdit,
+    QVBoxLayout,
 )
 
 from lisp.application import Application
 from lisp.core.properties import Property
-from lisp.cues.cue import Cue
+from lisp.cues.cue import Cue, CueAction
 from lisp.cues.media_cue import MediaCue
 from lisp.ui.cuelistdialog import CueSelectDialog
 from lisp.ui.settings.cue_settings import CueSettingsRegistry
@@ -40,8 +41,18 @@ class SeekCue(Cue):
     Name = QT_TRANSLATE_NOOP("CueName", "Seek Cue")
     Category = QT_TRANSLATE_NOOP("CueCategory", "Action cues")
 
+    CueActions = (
+        CueAction.Default,
+        CueAction.Start,
+        CueAction.Stop,
+        CueAction.Pause,
+        CueAction.Resume,
+        CueAction.Interrupt,
+    )
+
     target_id = Property()
     time = Property(default=-1)
+    icon = Property("action-forward")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -86,7 +97,8 @@ class SeekCueSettings(SettingsPage):
         self.layout().addWidget(self.seekGroup)
 
         self.seekEdit = QTimeEdit(self.seekGroup)
-        self.seekEdit.setDisplayFormat("HH.mm.ss.zzz")
+        self.seekEdit.setDisplayFormat("HH:mm:ss.zzz")
+        self.seekEdit.setCurrentSection(QDateTimeEdit.SecondSection)
         self.seekGroup.layout().addWidget(self.seekEdit)
 
         self.seekLabel = QLabel(self.seekGroup)

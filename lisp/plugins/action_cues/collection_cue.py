@@ -15,17 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with Linux Show Player.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QT_TRANSLATE_NOOP
+from PyQt5.QtCore import QT_TRANSLATE_NOOP, Qt
 from PyQt5.QtWidgets import (
-    QVBoxLayout,
-    QSizePolicy,
-    QDialogButtonBox,
-    QDialog,
     QAbstractItemView,
-    QHeaderView,
-    QTableView,
+    QDialog,
+    QDialogButtonBox,
     QGroupBox,
+    QHeaderView,
     QPushButton,
+    QSizePolicy,
+    QTableView,
+    QVBoxLayout,
 )
 
 from lisp.application import Application
@@ -43,7 +43,17 @@ class CollectionCue(Cue):
     Name = QT_TRANSLATE_NOOP("CueName", "Collection Cue")
     Category = QT_TRANSLATE_NOOP("CueCategory", "Action cues")
 
+    CueActions = (
+        CueAction.Default,
+        CueAction.Start,
+        CueAction.Stop,
+        CueAction.Pause,
+        CueAction.Resume,
+        CueAction.Interrupt,
+    )
+
     targets = Property(default=[])
+    icon = Property("collection")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -15,18 +15,20 @@
 # You should have received a copy of the GNU General Public License
 # along with Linux Show Player.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import QTime, Qt, QT_TRANSLATE_NOOP
+from PyQt5.QtCore import QT_TRANSLATE_NOOP, Qt, QTime
 from PyQt5.QtWidgets import (
+    QDateTimeEdit,
     QGroupBox,
     QHBoxLayout,
-    QTimeEdit,
     QLabel,
     QSpinBox,
+    QTimeEdit,
     QVBoxLayout,
 )
 
 from lisp.ui.settings.pages import SettingsPage
 from lisp.ui.ui_utils import translate
+from PyQt5.QtWidgets import QComboBox
 
 
 class MediaCueSettings(SettingsPage):
@@ -36,13 +38,31 @@ class MediaCueSettings(SettingsPage):
         super().__init__(**kwargs)
         self.setLayout(QVBoxLayout(self))
 
+        # Loop
+        self.loopGroup = QGroupBox(self)
+        self.loopGroup.setLayout(QHBoxLayout())
+        self.layout().addWidget(self.loopGroup)
+
+        # Combo box for loop selection: ∞ (infinite) -> -1, No repeat -> 0, 1..9 -> 1..9
+        self.spinLoop = QComboBox(self.loopGroup)
+        self.spinLoop.addItem("∞", -1)
+        self.spinLoop.addItem(translate("MediaCueSettings", "No repeat"), 0)
+        for i in range(1, 10):
+            self.spinLoop.addItem(str(i), i)        
+        self.loopGroup.layout().addWidget(self.spinLoop)
+
+        self.loopLabel = QLabel(self.loopGroup)
+        self.loopLabel.setAlignment(Qt.AlignCenter)
+        self.loopGroup.layout().addWidget(self.loopLabel)
+
         # Start time
         self.startGroup = QGroupBox(self)
         self.startGroup.setLayout(QHBoxLayout())
         self.layout().addWidget(self.startGroup)
 
         self.startEdit = QTimeEdit(self.startGroup)
-        self.startEdit.setDisplayFormat("HH.mm.ss.zzz")
+        self.startEdit.setDisplayFormat("HH:mm:ss.zzz")
+        self.startEdit.setCurrentSection(QDateTimeEdit.SecondSection)
         self.startGroup.layout().addWidget(self.startEdit)
 
         self.startLabel = QLabel(self.startGroup)
@@ -55,25 +75,15 @@ class MediaCueSettings(SettingsPage):
         self.layout().addWidget(self.stopGroup)
 
         self.stopEdit = QTimeEdit(self.stopGroup)
-        self.stopEdit.setDisplayFormat("HH.mm.ss.zzz")
+        self.stopEdit.setDisplayFormat("HH:mm:ss.zzz")
+        self.stopEdit.setCurrentSection(QDateTimeEdit.SecondSection)
         self.stopGroup.layout().addWidget(self.stopEdit)
 
         self.stopLabel = QLabel(self.stopGroup)
         self.stopLabel.setAlignment(Qt.AlignCenter)
         self.stopGroup.layout().addWidget(self.stopLabel)
 
-        # Loop
-        self.loopGroup = QGroupBox(self)
-        self.loopGroup.setLayout(QHBoxLayout())
-        self.layout().addWidget(self.loopGroup)
-
-        self.spinLoop = QSpinBox(self.loopGroup)
-        self.spinLoop.setRange(-1, 1_000_000)
-        self.loopGroup.layout().addWidget(self.spinLoop)
-
-        self.loopLabel = QLabel(self.loopGroup)
-        self.loopLabel.setAlignment(Qt.AlignCenter)
-        self.loopGroup.layout().addWidget(self.loopLabel)
+        
 
         self.retranslateUi()
 
@@ -90,7 +100,7 @@ class MediaCueSettings(SettingsPage):
         self.loopLabel.setText(
             translate(
                 "MediaCueSettings",
-                "Repetition after first play " "(-1 = infinite)",
+                "Repetition after first play"
             )
         )
 
@@ -104,7 +114,7 @@ class MediaCueSettings(SettingsPage):
             time = self.stopEdit.time().msecsSinceStartOfDay()
             settings["stop_time"] = time
         if self.isGroupEnabled(self.loopGroup):
-            settings["loop"] = self.spinLoop.value()
+            settings["loop"] = self.spinLoop.currentData()
 
         return {"media": settings}
 
@@ -117,7 +127,9 @@ class MediaCueSettings(SettingsPage):
         settings = settings.get("media", {})
 
         if "loop" in settings:
-            self.spinLoop.setValue(settings["loop"])
+            index = self.spinLoop.findData(settings["loop"])
+            if index >= 0:
+                self.spinLoop.setCurrentIndex(index)
         if "start_time" in settings:
             time = self._to_qtime(settings["start_time"])
             self.startEdit.setTime(time)

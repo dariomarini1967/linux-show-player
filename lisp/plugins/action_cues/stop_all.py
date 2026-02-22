@@ -15,8 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with Linux Show Player.  If not, see <http://www.gnu.org/licenses/>.
 
-from PyQt5.QtCore import Qt, QT_TRANSLATE_NOOP
-from PyQt5.QtWidgets import QComboBox, QVBoxLayout, QGroupBox
+from PyQt5.QtCore import QT_TRANSLATE_NOOP, Qt
+from PyQt5.QtWidgets import QComboBox, QGroupBox, QVBoxLayout
 
 from lisp.core.properties import Property
 from lisp.cues.cue import Cue, CueAction
@@ -29,7 +29,17 @@ class StopAll(Cue):
     Name = QT_TRANSLATE_NOOP("CueName", "Stop-All")
     Category = QT_TRANSLATE_NOOP("CueCategory", "Action cues")
 
+    CueActions = (
+        CueAction.Default,
+        CueAction.Start,
+        CueAction.Stop,
+        CueAction.Pause,
+        CueAction.Resume,
+        CueAction.Interrupt,
+    )
+
     action = Property(default=CueAction.Stop.value)
+    icon = Property("action-stop")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

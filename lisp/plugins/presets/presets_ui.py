@@ -305,7 +305,7 @@ class PresetsDialog(QDialog):
             insert_cue_from_preset(self.app, preset_name)
         except OSError as e:
             load_preset_error(e, preset_name)
-        except Exception as e:
+        except Exception:
             QMessageBox.warning(
                 self,
                 translate("Presets", "Warning"),
@@ -356,7 +356,7 @@ class PresetsDialog(QDialog):
                         translate("Presets", "Presets"),
                         translate(
                             "Presets",
-                            "Some presets already exists, " "overwrite?",
+                            "Some presets already exists, overwrite?",
                         ),
                         buttons=QMessageBox.Yes | QMessageBox.Cancel,
                     )
