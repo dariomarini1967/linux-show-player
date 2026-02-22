@@ -69,3 +69,7 @@ optional arguments:
 
 - poetry must be installed locally forcing version 1.8.2, command is
 pip install poetry==1.8.2
+Ubuntu Studio usually requires:
+libcairo-dev
+cmake
+
